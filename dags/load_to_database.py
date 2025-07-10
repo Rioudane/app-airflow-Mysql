@@ -21,6 +21,8 @@ INIT_SQL_PATH = os.path.join(DATA_DIR, "init.sql")
 
 MYSQL_CONN_ID = "mysql_default"
 
+# Define your delimiter here
+DELIMITER=";"
 
 def generate_schema():
     cmd = f"csvsql --dialect mysql --tables {TABLE_NAME} {CSV_FILE} > {INIT_SQL_PATH}"
@@ -40,7 +42,7 @@ def create_table():
 
 
 def load_data():
-    df = pd.read_csv(CSV_FILE)
+    df = pd.read_csv(CSV_FILE, delimiter=DELIMITER)
     hook = MySqlHook(mysql_conn_id=MYSQL_CONN_ID)
     engine = hook.get_sqlalchemy_engine()
     df.to_sql(TABLE_NAME, con=engine, if_exists='append', index=False)
