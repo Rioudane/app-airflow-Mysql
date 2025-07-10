@@ -1,11 +1,9 @@
 FROM apache/airflow:2.7.1
 
-COPY airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
-
 USER root
 RUN apt-get update && \
-    apt-get install -y postgresql-client && \
+    apt-get install -y default-mysql-client && \
     rm -rf /var/lib/apt/lists/*
 
 USER airflow
-RUN pip install --no-cache-dir psycopg2-binary requests csvkit
+RUN pip install pymysql mysqlclient requests csvkit

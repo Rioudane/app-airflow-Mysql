@@ -1,14 +1,13 @@
 services:
   airflow:
     build: ./airflow
-    container_name: airflow_multiple_files
+    container_name: airflow
     depends_on:
-      - postgres
+      - mysql
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__EXECUTOR: "LocalExecutor"
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://postgres:postgres@postgres:5432/data_ingestion"
-      AIRFLOW__LOGGING__REMOTE_LOGGING: "False"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "mysql+pymysql://root:root@mysql:3306/data_ingestion"
     ports:
       - "8082:8080"
     volumes:
@@ -20,7 +19,7 @@ services:
       bash -c "
         airflow db migrate &&
         airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin &&
-        airflow connections add 'postgres_default' --conn-uri 'postgresql+psycopg2://postgres:postgres@postgres:5432/data_ingestion' &&
+        airflow connections add 'mysql_default' --conn-uri 'mysql+pymysql://root:root@mysql:3306/data_ingestion' &&
         (airflow scheduler & airflow webserver)
       "
     healthcheck:
@@ -29,22 +28,22 @@ services:
       timeout: 30s
       retries: 3
     networks:
-      - airpost
+      - pipeline
 
-  postgres:
-    image: postgres:15
+  mysql:
+    image: mysql:8.0
     restart: always
-    container_name: Postgres_multiple_files
+    container_name: Mysql
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: data_ingestion
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: data_ingestion
     ports:
-      - "5433:5432"
+      - "3310:3306"
     networks:
-      - airpost
+      - pipeline
+
 
 networks:
-  airpost:
-    name: airpost
+  pipeline:
+    name: pipeline
     driver: bridge
